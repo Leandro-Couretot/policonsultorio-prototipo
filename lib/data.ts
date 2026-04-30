@@ -69,6 +69,40 @@ export const TURNOS_HOY: Turno[] = [
   { id: 't6', paciente_id: 'p6', hora: '15:00', tipo: 'RPG', estado: 'confirmado', pago_estado: 'seña_efectivo', monto: 18000, profesional: 'Dr. Sebastián Torres' },
 ]
 
+export interface Sesion {
+  id: string
+  paciente_id: string
+  fecha: string
+  disciplina: string
+  asistio: boolean
+  pago_estado: 'pagado' | 'pendiente' | 'seña'
+  monto: number
+}
+
+export const HISTORIAL_SESIONES: Sesion[] = [
+  { id: 's1', paciente_id: 'p1', fecha: '22/04', disciplina: 'Kinesiología', asistio: true, pago_estado: 'pagado', monto: 15000 },
+  { id: 's2', paciente_id: 'p1', fecha: '17/04', disciplina: 'Kinesiología', asistio: true, pago_estado: 'pagado', monto: 15000 },
+  { id: 's3', paciente_id: 'p1', fecha: '10/04', disciplina: 'Kinesiología', asistio: false, pago_estado: 'pendiente', monto: 15000 },
+  { id: 's4', paciente_id: 'p1', fecha: '03/04', disciplina: 'Kinesiología', asistio: true, pago_estado: 'pagado', monto: 15000 },
+
+  { id: 's5', paciente_id: 'p2', fecha: '29/04', disciplina: 'RPG', asistio: true, pago_estado: 'seña', monto: 18000 },
+  { id: 's6', paciente_id: 'p2', fecha: '22/04', disciplina: 'RPG', asistio: true, pago_estado: 'pagado', monto: 18000 },
+  { id: 's7', paciente_id: 'p2', fecha: '15/04', disciplina: 'RPG', asistio: true, pago_estado: 'pagado', monto: 18000 },
+  { id: 's8', paciente_id: 'p2', fecha: '08/04', disciplina: 'RPG', asistio: false, pago_estado: 'pendiente', monto: 18000 },
+  { id: 's9', paciente_id: 'p2', fecha: '01/04', disciplina: 'RPG', asistio: true, pago_estado: 'pagado', monto: 18000 },
+
+  { id: 's10', paciente_id: 'p3', fecha: '15/04', disciplina: 'Kinesiología', asistio: true, pago_estado: 'pagado', monto: 15000 },
+  { id: 's11', paciente_id: 'p3', fecha: '08/04', disciplina: 'Kinesiología', asistio: false, pago_estado: 'pendiente', monto: 15000 },
+
+  { id: 's12', paciente_id: 'p4', fecha: '29/04', disciplina: 'Estética', asistio: true, pago_estado: 'seña', monto: 20000 },
+
+  { id: 's13', paciente_id: 'p6', fecha: '22/04', disciplina: 'RPG', asistio: true, pago_estado: 'pagado', monto: 18000 },
+  { id: 's14', paciente_id: 'p6', fecha: '15/04', disciplina: 'RPG', asistio: true, pago_estado: 'pagado', monto: 18000 },
+  { id: 's15', paciente_id: 'p6', fecha: '08/04', disciplina: 'RPG', asistio: false, pago_estado: 'pendiente', monto: 18000 },
+  { id: 's16', paciente_id: 'p6', fecha: '01/04', disciplina: 'RPG', asistio: true, pago_estado: 'pagado', monto: 18000 },
+  { id: 's17', paciente_id: 'p6', fecha: '25/03', disciplina: 'RPG', asistio: true, pago_estado: 'pagado', monto: 18000 },
+]
+
 export const CONVERSACIONES: Conversacion[] = [
   {
     id: 'c1', paciente_id: 'p1', modo: 'bot', ultimo_mensaje: 'Tu turno está confirmado para mañana a las 9:00 ✅', ultima_hora: '10:23', no_leidos: 0,

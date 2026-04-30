@@ -3,12 +3,12 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   MessageSquare, Calendar, Users, LogOut, Bot, UserCheck,
-  Send, ChevronRight, Bell, Search, MoreVertical, X, Check,
-  CheckCheck, AlertTriangle, QrCode, CreditCard, Pause, Play,
-  PhoneCall, Clock
+  Send, ChevronRight, Search, X, CheckCheck, AlertTriangle,
+  Pause, Play, PanelRightOpen, PanelRightClose, CheckCircle,
+  XCircle, Clock, CreditCard, Banknote, Smartphone
 } from 'lucide-react'
 import {
-  PACIENTES, TURNOS_HOY, CONVERSACIONES,
+  PACIENTES, TURNOS_HOY, CONVERSACIONES, HISTORIAL_SESIONES,
   Conversacion, Mensaje, TurnoEstado, Turno
 } from '@/lib/data'
 
@@ -38,6 +38,7 @@ export default function AdminPage() {
   const [botGlobal, setBotGlobal] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
   const [cancelConfirm, setCancelConfirm] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -226,78 +227,170 @@ export default function AdminPage() {
             {selectedConv ? (() => {
               const paciente = getPaciente(selectedConv.paciente_id)
               const isHuman = selectedConv.modo === 'humano'
+              const historial = HISTORIAL_SESIONES.filter(s => s.paciente_id === paciente.id)
+              const sesionesRestantes = paciente.sesiones_total - paciente.sesiones_hechas
               return (
-                <div className="flex-1 flex flex-col bg-[#efeae2]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d4c9b8\' fill-opacity=\'0.3\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
-                  {/* Chat header */}
-                  <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 shadow-sm shrink-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-semibold text-sm">
-                        {paciente.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                <div className="flex-1 flex overflow-hidden">
+                  {/* Chat area */}
+                  <div className="flex-1 flex flex-col bg-[#efeae2]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23d4c9b8\' fill-opacity=\'0.3\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
+                    {/* Chat header */}
+                    <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 shadow-sm shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-semibold text-sm">
+                          {paciente.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm text-gray-900">{paciente.nombre}</p>
+                          <p className="text-xs text-gray-500">{paciente.telefono}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm text-gray-900">{paciente.nombre}</p>
-                        <p className="text-xs text-gray-500">{paciente.telefono}</p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleModoConv(selectedConv.id)}
+                          className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${isHuman ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-teal-100 text-teal-700 hover:bg-teal-200'}`}>
+                          {isHuman ? <><UserCheck className="w-3.5 h-3.5" /> Modo manual</> : <><Bot className="w-3.5 h-3.5" /> Modo bot</>}
+                        </button>
+                        <button
+                          onClick={() => setDrawerOpen(o => !o)}
+                          title="Ver historial del paciente"
+                          className={`p-2 rounded-xl transition-colors ${drawerOpen ? 'bg-teal-100 text-teal-700' : 'hover:bg-gray-100 text-gray-500'}`}>
+                          {drawerOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {/* Bot/Human toggle */}
-                      <button
-                        onClick={() => toggleModoConv(selectedConv.id)}
-                        className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-all ${isHuman ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-teal-100 text-teal-700 hover:bg-teal-200'}`}>
-                        {isHuman ? <><UserCheck className="w-3.5 h-3.5" /> Modo manual</> : <><Bot className="w-3.5 h-3.5" /> Modo bot</>}
-                      </button>
+
+                    {/* Messages */}
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin">
+                      {selectedConv.mensajes.map(msg => {
+                        const isOutgoing = msg.from === 'bot' || msg.from === 'admin'
+                        return (
+                          <div key={msg.id} className={`flex ${isOutgoing ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[75%] px-3 py-2 rounded-2xl shadow-sm ${
+                              msg.from === 'bot' ? 'bg-white text-gray-800 rounded-tl-sm' :
+                              msg.from === 'admin' ? 'bg-teal-600 text-white rounded-tr-sm' :
+                              'bg-white text-gray-800 rounded-tl-sm'
+                            }`}>
+                              {msg.from === 'bot' && <p className="text-[10px] text-teal-600 font-medium mb-0.5">🤖 Bot</p>}
+                              {msg.from === 'admin' && <p className="text-[10px] text-teal-100 font-medium mb-0.5">👩‍💼 {userName.split(' ')[0]}</p>}
+                              <p className="text-sm leading-relaxed">{msg.texto}</p>
+                              <div className={`flex items-center justify-end gap-1 mt-1 ${isOutgoing ? 'opacity-70' : ''}`}>
+                                <span className="text-[10px] opacity-60">{msg.hora}</span>
+                                {isOutgoing && <CheckCheck className="w-3 h-3 opacity-70" />}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                      <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Input */}
+                    <div className="bg-white px-4 py-3 shrink-0">
+                      {!isHuman && (
+                        <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-3 py-2 mb-2">
+                          <Bot className="w-4 h-4 text-teal-600 shrink-0" />
+                          <p className="text-xs text-teal-700">El bot está respondiendo automáticamente. Activá modo manual para responder vos.</p>
+                          <button onClick={() => toggleModoConv(selectedConv.id)} className="ml-auto text-xs font-medium text-teal-700 hover:underline shrink-0">Tomar control</button>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={inputMsg}
+                          onChange={e => setInputMsg(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && sendMessage()}
+                          disabled={!isHuman}
+                          placeholder={isHuman ? 'Escribí un mensaje...' : 'Activá modo manual para escribir'}
+                          className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                        <button onClick={sendMessage} disabled={!isHuman || !inputMsg.trim()}
+                          className="w-10 h-10 bg-teal-600 text-white rounded-full flex items-center justify-center hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin">
-                    {selectedConv.mensajes.map(msg => {
-                      const isOutgoing = msg.from === 'bot' || msg.from === 'admin'
-                      return (
-                        <div key={msg.id} className={`flex ${isOutgoing ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[75%] px-3 py-2 rounded-2xl shadow-sm ${
-                            msg.from === 'bot' ? 'bg-white text-gray-800 rounded-tl-sm' :
-                            msg.from === 'admin' ? 'bg-teal-600 text-white rounded-tr-sm' :
-                            'bg-white text-gray-800 rounded-tl-sm'
-                          }`}>
-                            {msg.from === 'bot' && <p className="text-[10px] text-teal-600 font-medium mb-0.5">🤖 Bot</p>}
-                            {msg.from === 'admin' && <p className="text-[10px] text-teal-100 font-medium mb-0.5">👩‍💼 {userName.split(' ')[0]}</p>}
-                            <p className="text-sm leading-relaxed">{msg.texto}</p>
-                            <div className={`flex items-center justify-end gap-1 mt-1 ${isOutgoing ? 'opacity-70' : ''}`}>
-                              <span className="text-[10px] opacity-60">{msg.hora}</span>
-                              {isOutgoing && <CheckCheck className="w-3 h-3 opacity-70" />}
+                  {/* ===== DRAWER HISTORIAL ===== */}
+                  {drawerOpen && (
+                    <div className="w-72 bg-white border-l border-gray-200 flex flex-col shrink-0 overflow-hidden">
+                      {/* Drawer header */}
+                      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
+                        <p className="font-semibold text-sm text-gray-900">Ficha del paciente</p>
+                        <button onClick={() => setDrawerOpen(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                          <X className="w-4 h-4 text-gray-400" />
+                        </button>
+                      </div>
+
+                      <div className="flex-1 overflow-y-auto scrollbar-thin">
+                        {/* Info paciente */}
+                        <div className="p-4 border-b border-gray-100">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold shrink-0">
+                              {paciente.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-900">{paciente.nombre}</p>
+                              <span className="text-xs px-2 py-0.5 bg-teal-50 text-teal-700 rounded-full">{paciente.tipo}</span>
+                            </div>
+                          </div>
+
+                          {/* Sesiones progress */}
+                          <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-500">Progreso del plan</span>
+                              <span className="text-xs font-bold text-gray-900">{paciente.sesiones_hechas}/{paciente.sesiones_total}</span>
+                            </div>
+                            <div className="bg-gray-200 rounded-full h-2">
+                              <div className="bg-teal-500 h-2 rounded-full transition-all"
+                                style={{ width: `${(paciente.sesiones_hechas / paciente.sesiones_total) * 100}%` }} />
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-xs text-gray-400">{paciente.sesiones_hechas} realizadas</span>
+                              <span className={`text-xs font-medium ${sesionesRestantes <= 2 ? 'text-orange-600' : 'text-teal-600'}`}>
+                                {sesionesRestantes} pendientes
+                              </span>
                             </div>
                           </div>
                         </div>
-                      )
-                    })}
-                    <div ref={messagesEndRef} />
-                  </div>
 
-                  {/* Input */}
-                  <div className="bg-white px-4 py-3 shrink-0">
-                    {!isHuman && (
-                      <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-3 py-2 mb-2">
-                        <Bot className="w-4 h-4 text-teal-600 shrink-0" />
-                        <p className="text-xs text-teal-700">El bot está respondiendo automáticamente. Activá modo manual para responder vos.</p>
-                        <button onClick={() => toggleModoConv(selectedConv.id)} className="ml-auto text-xs font-medium text-teal-700 hover:underline shrink-0">Tomar control</button>
+                        {/* Historial de sesiones */}
+                        <div className="p-4">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Últimas sesiones</p>
+
+                          {historial.length === 0 ? (
+                            <p className="text-xs text-gray-400 text-center py-4">Sin sesiones registradas</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {historial.map(s => (
+                                <div key={s.id} className="flex items-center gap-2 py-2 border-b border-gray-50 last:border-0">
+                                  {/* Asistencia */}
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${s.asistio ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                                    {s.asistio
+                                      ? <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                      : <XCircle className="w-4 h-4 text-red-500" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-gray-800">{s.fecha} · {s.disciplina}</p>
+                                    <p className={`text-[11px] ${!s.asistio ? 'text-red-500' : 'text-gray-400'}`}>
+                                      {!s.asistio ? 'No asistió' : 'Asistió'}
+                                    </p>
+                                  </div>
+                                  {/* Pago */}
+                                  <div className={`text-[11px] px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                                    s.pago_estado === 'pagado' ? 'bg-green-100 text-green-700' :
+                                    s.pago_estado === 'seña' ? 'bg-blue-100 text-blue-700' :
+                                    'bg-orange-100 text-orange-600'
+                                  }`}>
+                                    {s.pago_estado === 'pagado' ? '✓ Pagó' : s.pago_estado === 'seña' ? '₱ Seña' : '$ Debe'}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <input
-                        value={inputMsg}
-                        onChange={e => setInputMsg(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                        disabled={!isHuman}
-                        placeholder={isHuman ? 'Escribí un mensaje...' : 'Activá modo manual para escribir'}
-                        className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                      />
-                      <button onClick={sendMessage} disabled={!isHuman || !inputMsg.trim()}
-                        className="w-10 h-10 bg-teal-600 text-white rounded-full flex items-center justify-center hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                        <Send className="w-4 h-4" />
-                      </button>
                     </div>
-                  </div>
+                  )}
                 </div>
               )
             })() : (

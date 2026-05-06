@@ -194,11 +194,11 @@ function DemoContent() {
           const data = await res.json()
           setCargandoPago(false)
 
-          if (data.url) {
+          if (data.sandbox_url) {
             agregarBot(
               `💳 ¡Listo! Tu link de pago está listo. Tenés *48 horas* para abonar la seña y confirmar el turno.`,
               undefined,
-              data.url
+              data.sandbox_url
             )
             setPaso('pago_listo')
           } else {

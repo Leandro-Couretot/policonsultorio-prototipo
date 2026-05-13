@@ -25,6 +25,10 @@ export async function POST(req: NextRequest) {
       failure: `${appUrl}/demo?pago=error`,
       pending: `${appUrl}/demo?pago=pendiente`,
     },
+    payment_methods: {
+      excluded_payment_types: [],
+      installments: 1,
+    },
     auto_return: 'approved',
     statement_descriptor: 'Policonsultorio Ciudad Jardin',
   }
